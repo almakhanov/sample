@@ -1,4 +1,4 @@
-package kz.dodix.sample.remote
+package kz.dodix.sample.data.remote
 
 import com.google.gson.JsonParseException
 import kotlinx.coroutines.Deferred
@@ -134,7 +134,12 @@ class ApiInteractor : CoroutineCaller {
                         if (errorBody.isNullOrBlank()) {
                             AsyncResult.Error("Сервер вернул ошибку ${e.code()}", e.code())
                         } else {
-                            AsyncResult.Error(ErrorResponse.print(errorBody, e.code()), e.code())
+                            AsyncResult.Error(
+                                ErrorResponse.print(
+                                    errorBody,
+                                    e.code()
+                                ), e.code()
+                            )
                         }
                     }
                 }

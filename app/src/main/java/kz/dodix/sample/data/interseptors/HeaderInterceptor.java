@@ -1,4 +1,4 @@
-package kz.dodix.sample.remote.interseptors;
+package kz.dodix.sample.data.interseptors;
 
 import java.io.IOException;
 import okhttp3.Interceptor;

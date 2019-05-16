@@ -1,4 +1,4 @@
-package kz.dodix.sample.remote
+package kz.dodix.sample.data.remote
 
 object TokenHolder {
     var token = ""

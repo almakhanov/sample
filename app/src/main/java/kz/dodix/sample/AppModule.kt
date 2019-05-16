@@ -3,11 +3,11 @@ package kz.dodix.sample
 import android.content.Context
 import com.google.gson.GsonBuilder
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
-import kz.dodix.sample.remote.Api
-import kz.dodix.sample.remote.CoroutineProvider
-import kz.dodix.sample.remote.TokenHolder
-import kz.dodix.sample.remote.interseptors.HeaderInterceptor
-import kz.dodix.sample.remote.interseptors.TokenInterceptor
+import kz.dodix.sample.data.remote.Api
+import kz.dodix.sample.data.remote.CoroutineProvider
+import kz.dodix.sample.data.remote.TokenHolder
+import kz.dodix.sample.data.interseptors.HeaderInterceptor
+import kz.dodix.sample.data.interseptors.TokenInterceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext

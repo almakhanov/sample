@@ -1,6 +1,6 @@
-package kz.dodix.sample.remote.interseptors;
+package kz.dodix.sample.data.interseptors;
 
-import kz.dodix.sample.remote.TokenHolder;
+import kz.dodix.sample.data.remote.TokenHolder;
 import java.io.IOException;
 import okhttp3.Interceptor;
 import okhttp3.Request;

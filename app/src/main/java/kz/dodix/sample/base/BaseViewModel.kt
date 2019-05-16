@@ -5,8 +5,8 @@ import androidx.lifecycle.ViewModel
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import kotlinx.coroutines.*
-import kz.dodix.sample.remote.AsyncResult
-import kz.dodix.sample.remote.CoroutineProvider
+import kz.dodix.sample.data.remote.AsyncResult
+import kz.dodix.sample.data.remote.CoroutineProvider
 import org.koin.standalone.KoinComponent
 import org.koin.standalone.inject
 

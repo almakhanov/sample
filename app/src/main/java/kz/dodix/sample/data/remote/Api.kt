@@ -1,4 +1,4 @@
-package kz.dodix.sample.remote
+package kz.dodix.sample.data.remote
 
 interface Api {
 

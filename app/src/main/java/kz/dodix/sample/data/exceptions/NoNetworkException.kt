@@ -1,4 +1,4 @@
-package kz.dodix.sample.remote.exceptions
+package kz.dodix.sample.data.exceptions
 
 class NoNetworkException : RuntimeException {
 

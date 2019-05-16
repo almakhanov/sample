@@ -1,4 +1,4 @@
-package kz.dodix.sample.remote
+package kz.dodix.sample.data.remote
 
 import kotlinx.coroutines.Deferred
 import retrofit2.Response
