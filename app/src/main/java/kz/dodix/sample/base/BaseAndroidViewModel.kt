@@ -1,23 +1,25 @@
 package kz.dodix.sample.base
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kz.dodix.sample.data.remote.AsyncResult
 import kz.dodix.sample.data.remote.CoroutineProvider
 import org.koin.standalone.KoinComponent
-import org.koin.standalone.inject
 
-abstract class BaseViewModel(
+abstract class BaseAndroidViewModel(
+    app: Application,
     private val scopeProvider: CoroutineProvider = CoroutineProvider(),
     private val coroutineJob: Job = Job(),
     protected val scope: CoroutineScope = CoroutineScope(coroutineJob + scopeProvider.IO),
     _statusLiveData: MutableLiveData<Status> = MutableLiveData(),
     _errorLiveData: MutableLiveData<EventWrapper<String>> = MutableLiveData()
-) : ViewModel(), KoinComponent, UiCaller {
+) : AndroidViewModel(app), KoinComponent, UiCaller {
     private val disposable = CompositeDisposable()
 
     internal val uiCaller: UiCaller =
@@ -52,23 +54,10 @@ abstract class BaseViewModel(
         disposable.clear()
         coroutineJob.cancel()
     }
-
-    fun io(work: suspend (() -> Unit)): Job =
-        scope.launch(scopeProvider.IO) {
-            work()
-        }
-
-    fun <T : Any> ioThenMain(work: suspend (() -> T?), callback: ((T?) -> Unit)): Job =
-        scope.launch(scopeProvider.Main) {
-            val data = scope.async(scopeProvider.IO) rt@{
-                return@rt work()
-            }.await()
-            callback(data)
-        }
 }
 
 
-inline fun <T> BaseViewModel.launchCoroutine(
+inline fun <T> BaseAndroidViewModel.launchCoroutine(
     noinline call: suspend () -> AsyncResult<T>,
     crossinline block: (T) -> Unit
 ) {

@@ -8,6 +8,7 @@ import kz.dodix.sample.data.remote.CoroutineProvider
 import kz.dodix.sample.data.remote.TokenHolder
 import kz.dodix.sample.data.interseptors.HeaderInterceptor
 import kz.dodix.sample.data.interseptors.TokenInterceptor
+import kz.dodix.sample.data.remote.OpenApi
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
@@ -15,60 +16,71 @@ import org.koin.dsl.module.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
+import javax.net.ssl.HostnameVerifier
 
 
 val appModule = module {
-    factory {
-        createOkHttpClient(androidContext())
-    }
-    factory {
-        createWebService<Api>(get(), "url")
-    }
+
+    /**
+     * Api services
+     */
+    factory { createWebService<OpenApi>(get("openApi"), BuildConfig.API_URL) }
+    factory { createWebService<Api>(get("default"), BuildConfig.API_URL) }
+
+    /**
+     * [OkHttpClient] instances
+     */
+    factory("default") { createOkHttpClient(androidContext(), get()) }
+    factory("openApi") { createOkHttpOpenApi(androidContext()) }
+
+
     factory {
         CoroutineProvider()
     }
+
     module("repository") {
-//        single {
-//            ProductRepository(get(), get())
-//        }
-//        factory {
-//            PersonalRepository(get(), get())
-//        }
-//        factory {
-//            MenuRepository(get(), get())
-//        }
-//
-//        viewModel {
-//            PartialWithDrawViewModel(get())
-//        }
 
     }
 }
 
-fun createOkHttpClient(context: Context): OkHttpClient {
-    val httpLoggingInterceptor = HttpLoggingInterceptor()
-    httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
-    val okHttpBuilder = OkHttpClient.Builder()
-            .connectTimeout(300L, TimeUnit.SECONDS)
-            .readTimeout(300L, TimeUnit.SECONDS)
-            .addInterceptor(httpLoggingInterceptor)
-            .addInterceptor(HeaderInterceptor())
-    if (TokenHolder.token.isNotEmpty()) {
-        okHttpBuilder.addInterceptor(TokenInterceptor())
-    }
-    okHttpBuilder.hostnameVerifier { _, _ -> true }
-    return okHttpBuilder.build()
+const val timeout = 120L
+
+val httpLoggingInterceptor = HttpLoggingInterceptor().apply {
+    level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY
+    else HttpLoggingInterceptor.Level.NONE
 }
+
+val hostnameVerifier = HostnameVerifier { _, _ -> true }
+
+fun createOkHttpClient(context: Context, tokenInterceptor: TokenInterceptor) =
+    OkHttpClient.Builder()
+        .connectTimeout(timeout, TimeUnit.SECONDS)
+        .readTimeout(timeout, TimeUnit.SECONDS)
+        .hostnameVerifier(hostnameVerifier)
+        .addInterceptor(HeaderInterceptor())
+        .addInterceptor(tokenInterceptor)
+        .addInterceptor(httpLoggingInterceptor)
+        //.sslSocketFactory(TLSSocketFactory.getSSLSocketFactory(context))
+        .build()
+
+fun createOkHttpOpenApi(context: Context) = OkHttpClient.Builder()
+    .connectTimeout(timeout, TimeUnit.SECONDS)
+    .readTimeout(timeout, TimeUnit.SECONDS)
+    .hostnameVerifier(hostnameVerifier)
+    .addInterceptor(HeaderInterceptor())
+    .addInterceptor(httpLoggingInterceptor)
+    //.sslSocketFactory(TLSSocketFactory.getSSLSocketFactory(context))
+    .build()
 
 inline fun <reified T> createWebService(okHttpClient: OkHttpClient, url: String): T {
     val gson = GsonBuilder()
-            .setLenient()
-            .create()
+        .setLenient()
+        .create()
 
     val retrofit = Retrofit.Builder()
-            .baseUrl(url)
-            .client(okHttpClient)
-            .addCallAdapterFactory(CoroutineCallAdapterFactory())
-            .addConverterFactory(GsonConverterFactory.create(gson)).build()
+        .baseUrl(url)
+        .client(okHttpClient)
+        .addCallAdapterFactory(CoroutineCallAdapterFactory())
+        .addConverterFactory(GsonConverterFactory.create(gson)).build()
     return retrofit.create(T::class.java)
 }
